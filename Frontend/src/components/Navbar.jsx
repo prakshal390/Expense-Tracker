@@ -9,7 +9,7 @@ import { toast } from "sonner"; // Changed from react-toastify to sonner
 import { useSelector } from "react-redux";
 
 const Navbar = () => {
-  const {user} = useSelector(store=>store.auth);
+  const { user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
 
   const logoutHandler = async () => {
@@ -24,11 +24,14 @@ const Navbar = () => {
       toast.error(error.response?.data?.msg || "Logout failed");
     }
   };
-  
+
   return (
     <div className="border-b border-gray-300">
       <div className="flex items-center justify-between max-w-8xl mx-auto h-23">
         <Logo />
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold">Expense Tracker</h1>
+        </div>
 
         {user ? (
           <Popover>
@@ -37,19 +40,18 @@ const Navbar = () => {
                 <AvatarImage src="https://github.com/shadcn.png" />
               </Avatar>
             </PopoverTrigger>
-            
+
             <PopoverContent>
               <button onClick={logoutHandler}>Logout</button>
             </PopoverContent>
-
           </Popover>
         ) : (
           <div className="flex space-x-4">
-            <Link to="/login">   
-              <button>Login</button>  
+            <Link to="/login">
+              <button>Login</button>
             </Link>
-            <Link to="/signup">  
-              <button>Signup</button>  
+            <Link to="/signup">
+              <button>Signup</button>
             </Link>
           </div>
         )}
