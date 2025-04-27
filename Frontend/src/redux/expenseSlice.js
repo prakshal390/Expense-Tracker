@@ -6,7 +6,7 @@ const expenseSlice = createSlice({
     items: [], // Ensure items is initialized
     category: 'all',
     markAsDone: 'Both',
-    singleExpense:null
+    singleExpense: null
   },
   reducers: {
     setExpenses: (state, action) => {
@@ -20,10 +20,19 @@ const expenseSlice = createSlice({
     },
     setSingleExpense: (state, action) => {
       state.singleExpense = action.payload;
-      },
+    },
+    addExpense: (state, action) => {
+      state.items.push(action.payload); // Add the new expense to the list
+    },
+    updateExpense: (state, action) => {
+      const index = state.items.findIndex((expense) => expense._id === action.payload._id);
+      if (index !== -1) {
+        state.items[index] = action.payload; // Update the existing expense
+      }
+    },
   },
 });
 
-export const { setExpenses, setCategory, setMarkAsDone , setSingleExpense } = expenseSlice.actions;
+export const { setExpenses, setCategory, setMarkAsDone, setSingleExpense, addExpense, updateExpense } = expenseSlice.actions;
 
 export default expenseSlice.reducer;

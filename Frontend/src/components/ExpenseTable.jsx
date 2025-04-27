@@ -10,58 +10,69 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { Checkbox } from "./ui/checkbox";
 import { Trash } from "lucide-react";
 import UpdateExpense from "./UpdateExpense";
 import axios from "axios";
 import { toast } from "sonner";
-
+import { motion } from "framer-motion";
 
 const ExpenseTable = ({ expenses }) => {
   const [expenseList, setExpenseList] = useState(expenses);
-  const [checkedItems,setCheckedItem] = useState({});
+  const [checkedItems, setCheckedItem] = useState({});
 
   // Update local state when props change
   useEffect(() => {
     setExpenseList(expenses);
   }, [expenses]);
 
-
-  const totalAmount = expenseList.reduce((acc,expense) => {
-    if(!checkedItems[expense._id]) {
-     return acc + expense.amount;
+  const totalAmount = expenseList.reduce((acc, expense) => {
+    if (!checkedItems[expense._id]) {
+      return acc + expense.amount;
     }
     return acc;
-  } , 0);
+  }, 0);
 
   const handledCheckboxChange = async (expenseId) => {
-      const newStatus = !checkedItems[expenseId];
-      try {
-        const res = await axios.put(`http://localhost:5000/api/v3/expense/done/${expenseId}`,{done:newStatus},
-          {headers:{
-            'Content-Type': 'application/json',
-           },
-           withCredentials : true
-          })
-         if(res.data.success)
-         {
-          toast.success(res.data.msg);
-          setCheckedItem(prevData => ({...prevData, [expenseId]: newStatus}));
-          setExpenseList (expenseList.map(expense => expense._id === expenseId ? {...expense, done:newStatus}:expense));
-         }
-      } catch (error) {
-        console.log(error);
+    const newStatus = !checkedItems[expenseId];
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/v3/expense/done/${expenseId}`,
+        { done: newStatus },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        toast.success(res.data.msg);
+        setCheckedItem((prevData) => ({ ...prevData, [expenseId]: newStatus }));
+        setExpenseList(
+          expenseList.map((expense) =>
+            expense._id === expenseId
+              ? { ...expense, done: newStatus }
+              : expense
+          )
+        );
       }
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const removeExpenseHandler = async (expenseId) => {
     try {
-      const res = await axios.delete(`http://localhost:5000/api/v3/expense/remove/${expenseId}`);
+      const res = await axios.delete(
+        `http://localhost:5000/api/v3/expense/remove/${expenseId}`
+      );
       if (res.data.success) {
         toast.success(res.data.msg);
-        // Update the local state to remove the deleted expense
-        setExpenseList(prevExpenses => prevExpenses.filter(expense => expense._id !== expenseId));
+        setExpenseList((prevExpenses) =>
+          prevExpenses.filter((expense) => expense._id !== expenseId)
+        );
       } else {
         toast.error("Failed to delete expense");
       }
@@ -71,9 +82,41 @@ const ExpenseTable = ({ expenses }) => {
     }
   };
 
+  // Split the caption text into individual words
+  const captionText = "😊A list of your recent expenses😊";
+  const words = captionText.split(" ");
+
   return (
     <Table>
-      <TableCaption className="font-bold text-xl" >😊A list of your recent expenses😊.</TableCaption>
+      {/* Animated Table Caption */}
+      <TableCaption className="font-bold text-xl">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 1,
+            repeat: Infinity, // Repeat the animation continuously
+            repeatType: "loop", // Loop after each cycle
+            ease: "easeInOut",
+          }}
+        >
+          {words.map((word, index) => (
+            <motion.span
+              key={index}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                delay: index * 1, // Delay each word's animation to create sequence
+              }}
+            >
+              {word}{" "}
+            </motion.span>
+          ))}
+        </motion.div>
+      </TableCaption>
+
       <TableHeader>
         <TableRow>
           <TableHead>Mark As Done</TableHead>
@@ -87,32 +130,44 @@ const ExpenseTable = ({ expenses }) => {
       <TableBody>
         {expenseList.map((expense) => (
           <TableRow key={expense.id}>
-            <TableCell className="font-medium"> 
-              <Checkbox checked={expense.done}
-              onCheckedChange={() => handledCheckboxChange(expense._id)} 
+            <TableCell className="font-medium">
+              <Checkbox
+                checked={expense.done}
+                onCheckedChange={() => handledCheckboxChange(expense._id)}
               />
             </TableCell>
             <p>
-            <TableCell className={`${expense.done ? 'line-through' : ''}`}>{expense.category}</TableCell>
+              <TableCell className={`${expense.done ? "line-through" : ""}`}>
+                {expense.category}
+              </TableCell>
             </p>
-            <TableCell className={`${expense.done ? 'line-through' : ''}`}>{expense.description}</TableCell>
-            <TableCell className={`${expense.done ? 'line-through' : ''}`}>{expense.amount}</TableCell>
-            {/* <TableCell>{expense.createdAt?.split("T")[0]}</TableCell> */}
-            <p className={`${expense.done ? 'line-through' : ''}`}>
-            {new Date(expense.createdAt).toLocaleDateString("en-GB", {
-             weekday: "long",  // Shows full day name (e.g., Monday)
-             year: "numeric",
-             month: "short",   // Shows abbreviated month (e.g., Jan)
-             day: "numeric",
-             hour: "2-digit",  // 2-digit hour (e.g., 10)
-             minute: "2-digit", // 2-digit minutes (e.g., 30)
-             second: "2-digit", // 2-digit seconds (e.g., 45)
-             hour12: true  // Ensures AM/PM format
-            })}
+            <TableCell className={`${expense.done ? "line-through" : ""}`}>
+              {expense.description}
+            </TableCell>
+            <TableCell className={`${expense.done ? "line-through" : ""}`}>
+              {expense.amount}
+            </TableCell>
+            <p className={`${expense.done ? "line-through" : ""}`}>
+              {new Date(expense.createdAt).toLocaleDateString("en-GB", {
+                weekday: "long",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })}
             </p>
             <TableCell className="text-right">
               <div className="flex items-center justify-end gap-2">
-                <button onClick={()=> removeExpenseHandler(expense._id) } size="icon" className="rounded-full border text-red-600 border-red-600 hover:border-transparent"> <Trash /></button>
+                <button
+                  onClick={() => removeExpenseHandler(expense._id)}
+                  size="icon"
+                  className="rounded-full border text-red-600 border-red-600 hover:border-transparent"
+                >
+                  <Trash />
+                </button>
                 <UpdateExpense expense={expense} />
               </div>
             </TableCell>
@@ -120,18 +175,18 @@ const ExpenseTable = ({ expenses }) => {
           </TableRow>
         ))}
       </TableBody>
-      <TableFooter>  
+      <TableFooter>
         <TableRow>
           <TableCell colSpan={5}>Total</TableCell>
           <TableCell className="text-right font-bold text-xl">
-          ₹{totalAmount}
-          {/* ₹{expenseList.reduce((total, expense) => total + expense.amount, 0)} */}
+            ₹{totalAmount}
           </TableCell>
         </TableRow>
       </TableFooter>
     </Table>
   );
 };
+
 ExpenseTable.propTypes = {
   expenses: PropTypes.arrayOf(
     PropTypes.shape({

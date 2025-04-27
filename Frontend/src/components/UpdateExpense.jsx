@@ -50,7 +50,7 @@ const UpdateExpense = ({ expense }) => {
       );
       if (res.data.success) {
         toast.success(res.data.msg);
-        // Dispatch a custom event to update real time expenses
+        // Dispatch a custom event to notify about the updated expense
         window.dispatchEvent(new CustomEvent("expenseUpdated", { detail: res.data.expense }));
         setOpen(false);
       } else {
@@ -111,6 +111,7 @@ const UpdateExpense = ({ expense }) => {
                   <SelectItem value="Shopping">Shopping</SelectItem>
                   <SelectItem value="Rent">Rent</SelectItem>
                   <SelectItem value="others">Others</SelectItem>
+                  <SelectItem value="Entertainment">Entertainment</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

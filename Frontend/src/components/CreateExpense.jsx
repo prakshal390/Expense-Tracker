@@ -1,9 +1,25 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -37,13 +53,21 @@ const CreateExpense = () => {
     console.log("Submitting expense:", formData);
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/v3/expense/add", formData, { 
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/v3/expense/add",
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
       console.log("API response:", res.data);
       if (res.data.success) {
         toast.success(res.data.msg);
+        // Dispatch a custom event to notify about the new expense
+        window.dispatchEvent(
+          new CustomEvent("expenseAdded", { detail: res.data.expense })
+        );
         // Reset form and close dialog after a successful expense add
         setFormData({ description: "", amount: "", category: "" });
         setOpen(false);
@@ -51,7 +75,10 @@ const CreateExpense = () => {
         toast.error(res.data.message || "Failed to add expense");
       }
     } catch (error) {
-      console.log("Error details:", error.response ? error.response.data : error);
+      console.log(
+        "Error details:",
+        error.response ? error.response.data : error
+      );
       toast.error(error.response?.data?.msg || "Failed to add expense");
     } finally {
       setLoading(false);
@@ -89,16 +116,16 @@ const CreateExpense = () => {
               <Label htmlFor="amount" className="text-right">
                 Amount
               </Label>
-              <Input 
-                id="amount" 
+              <Input
+                id="amount"
                 placeholder="amount in ₹"
                 className="col-span-3"
-                name="amount" 
+                name="amount"
                 value={formData.amount}
                 onChange={changeEventHandler}
               />
             </div>
-            <Select onValueChange={changeCategoryHandler}> 
+            <Select onValueChange={changeCategoryHandler}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a Category" />
               </SelectTrigger>
@@ -108,9 +135,10 @@ const CreateExpense = () => {
                   <SelectItem value="Food">Food</SelectItem>
                   <SelectItem value="Shopping">Shopping</SelectItem>
                   <SelectItem value="Rent">Rent</SelectItem>
+                  <SelectItem value="Entertainment">Entertainment</SelectItem>
                   <SelectItem value="others">Others</SelectItem>
                 </SelectGroup>
-              </SelectContent> 
+              </SelectContent>
             </Select>
           </div>
           <DialogFooter>
